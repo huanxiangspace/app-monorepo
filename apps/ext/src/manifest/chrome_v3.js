@@ -94,7 +94,7 @@ module.exports = {
           'world': 'MAIN',
           'matches': ['http://*/*', 'https://*/*', '<all_urls>'],
           'exclude_matches': excludeMatches,
-          'js': ['injected.js'],
+          'js': ['injected-property.js', 'injected.js'],
           'run_at': 'document_start',
           'all_frames': true, // including iframe inject
         }

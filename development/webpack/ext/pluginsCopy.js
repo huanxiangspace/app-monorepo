@@ -32,6 +32,7 @@ const copy1 = createCopyPlugin({
       },
     }),
     createPattern('src/entry/injected.js'),
+    createPattern('src/entry/injected-property.js'),
     // createPattern('src/entry/offscreen.html'),
     // createPattern('src/entry/offscreen.js'),
 
