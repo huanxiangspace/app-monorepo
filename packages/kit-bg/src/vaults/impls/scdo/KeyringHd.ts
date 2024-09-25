@@ -20,15 +20,15 @@ export class KeyringHd extends KeyringHdBase {
   override async getPrivateKeys(
     params: IGetPrivateKeysParams,
   ): Promise<IGetPrivateKeysResult> {
-    throw new NotImplemented();
-    // return this.baseGetPrivateKeys(params);
+    // throw new NotImplemented();
+    return this.baseGetPrivateKeys(params);
   }
 
   override async prepareAccounts(
     params: IPrepareHdAccountsParams,
   ): Promise<IDBAccount[]> {
-    throw new NotImplemented();
-    // return this.basePrepareAccountsHd(params);
+    // throw new NotImplemented();
+    return this.basePrepareAccountsHd(params);
   }
 
   override async signTransaction(

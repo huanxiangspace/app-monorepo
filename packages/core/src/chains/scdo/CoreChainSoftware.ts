@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { NotImplemented } from '@onekeyhq/shared/src/errors';
+import {
+  NotImplemented,
+  OneKeyInternalError,
+} from '@onekeyhq/shared/src/errors';
+import bufferUtils from '@onekeyhq/shared/src/utils/bufferUtils';
+import hexUtils from '@onekeyhq/shared/src/utils/hexUtils';
 
 import { CoreChainApiBase } from '../../base/CoreChainApiBase';
+import { secp256k1 } from '../../secret';
+
+import { publicKeyToAddress } from './sdkScdo';
 
 import type {
   ICoreApiGetAddressItem,
@@ -21,16 +29,20 @@ import type {
 const curve: ICurveName = 'secp256k1';
 
 export default class CoreChainSoftware extends CoreChainApiBase {
-  override getExportedSecretKey(
+  override async getExportedSecretKey(
     query: ICoreApiGetExportedSecretKey,
   ): Promise<string> {
-    throw new NotImplemented();
+    const { privateKeyRaw } = await this.baseGetDefaultPrivateKey(query);
+    return Promise.resolve(privateKeyRaw);
   }
 
   override async getPrivateKeys(
     payload: ICoreApiSignBasePayload,
   ): Promise<ICoreApiPrivateKeysMap> {
-    throw new NotImplemented();
+    return this.baseGetPrivateKeys({
+      payload,
+      curve,
+    });
   }
 
   override async signTransaction(
@@ -46,18 +58,34 @@ export default class CoreChainSoftware extends CoreChainApiBase {
   override async getAddressFromPrivate(
     query: ICoreApiGetAddressQueryImported,
   ): Promise<ICoreApiGetAddressItem> {
-    throw new NotImplemented();
+    const { privateKeyRaw } = query;
+    if (!hexUtils.isHexString(privateKeyRaw)) {
+      throw new OneKeyInternalError('Invalid private key.');
+    }
+    const privateKey = bufferUtils.toBuffer(privateKeyRaw);
+    if (privateKey.length !== 32) {
+      throw new OneKeyInternalError('Invalid private key.');
+    }
+    const publicKey = secp256k1.publicFromPrivate(privateKey).toString('hex');
+    return this.getAddressFromPublic({
+      ...query,
+      publicKey,
+    });
   }
 
   override async getAddressFromPublic(
     query: ICoreApiGetAddressQueryPublicKey,
   ): Promise<ICoreApiGetAddressItem> {
-    throw new NotImplemented();
+    const { publicKey } = query;
+    const address = publicKeyToAddress(bufferUtils.toBuffer(publicKey));
+    return Promise.resolve({ address, publicKey });
   }
 
   override async getAddressesFromHd(
     query: ICoreApiGetAddressesQueryHd,
   ): Promise<ICoreApiGetAddressesResult> {
-    throw new NotImplemented();
+    return this.baseGetAddressesFromHd(query, {
+      curve,
+    });
   }
 }
